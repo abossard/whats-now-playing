@@ -212,6 +212,70 @@ These databases are automatically rebuilt when:
 * Database age exceeds **Max age** threshold
 * Database files are missing or corrupted
 
+## Playback Position Tracking
+
+**Current Status:** Virtual DJ integration does **NOT** track playback position or elapsed time.
+
+### What's Available in EXTVDJ Format
+
+Virtual DJ's history files include timing fields that could theoretically support position tracking:
+
+* `<time>` - Wall clock time when the track started (24-hour format)
+* `<lastplaytime>` - Unix epoch timestamp when the track was last played
+
+### Why Position Tracking Is Not Implemented
+
+**What's Now Playing** currently **does not parse or use** these timing fields because:
+
+1. **Track Change Detection Focus** - The primary goal is detecting *what* is playing, not *when* or *how long*
+2. **File-Based Polling Limitations** - History files are updated intermittently by Virtual DJ, not continuously
+3. **Accuracy Concerns** - File modification timestamps and write delays make real-time position tracking unreliable
+4. **No Duration in History** - EXTVDJ format doesn't include track duration, requiring database lookups
+5. **No Update Frequency Control** - Virtual DJ controls when history files are written, not What's Now Playing
+
+### Potential Accuracy If Implemented
+
+If position tracking were added using the `lastplaytime` timestamp:
+
+**Best Case Scenario:**
+
+* **±1-3 seconds accuracy** when history files are written immediately
+* Calculated position = (current time - lastplaytime)
+* Works for tracks longer than ~30 seconds
+
+**Real-World Limitations:**
+
+* **Variable write delays** - VDJ may buffer writes for several seconds
+* **No update during playback** - Position only updates when file is rewritten
+* **Crossfader/deck switching** - Rapid changes may have stale timestamps
+* **File system caching** - OS-level buffering can delay file watcher notifications
+* **Network drives** - SMB/NFS latency compounds accuracy issues
+
+### Alternative Approaches for Better Accuracy
+
+For applications requiring precise playback position:
+
+1. **Database Duration Field** - Virtual DJ's `database.xml` includes track duration
+   * Calculate remaining time: `duration - (current_time - lastplaytime)`
+   * Still limited by history file update frequency
+2. **MPRIS2 Support** - Virtual DJ doesn't currently expose MPRIS2 interface
+   * Would provide native position updates if implemented
+3. **API Integration** - Virtual DJ lacks public real-time API
+   * No official method for millisecond-accurate position tracking
+4. **Polling Observer Tuning** - Enable "Use Polling Observer" in Settings → Quirks
+   * Reduces file watcher latency on some systems
+   * Still limited by VDJ's write frequency
+
+### Recommendation
+
+For streaming/DJ applications, **track change detection** (current implementation) is usually sufficient since
+viewers primarily care about *what song is playing* rather than *exact position within the song*. If precise
+position tracking is critical, consider:
+
+* Using a DJ software with MPRIS2 support (e.g., Mixxx)
+* Using JRiver Media Center (supports position via MCWS API)
+* Accepting ±3-5 second accuracy limitations with Virtual DJ
+
 ## Technical Details
 
 ### File Format Specifications
@@ -222,8 +286,8 @@ These databases are automatically rebuilt when:
 #EXTVDJ:<time>HH:MM</time><lastplaytime>UNIX_TIMESTAMP</lastplaytime><artist>ARTIST_NAME</artist><title>TITLE</title><remix>REMIX_INFO</remix>
 ```
 
-* `time` - 24-hour format timestamp
-* `lastplaytime` - Unix epoch timestamp
+* `time` - 24-hour format timestamp (currently not parsed by What's Now Playing)
+* `lastplaytime` - Unix epoch timestamp (currently not parsed by What's Now Playing)
 * `artist` - Track artist (supports special characters and ampersands)
 * `title` - Track title
 * `remix` - Optional remix/version information
