@@ -318,9 +318,10 @@ provides comprehensive playback information.
    * Supports Windows, Mac, and Linux
    * Commercial software ($60-80)
 
-**Accuracy:** JRiver provides track duration in milliseconds but **does not expose current playback position**
-in the What's Now Playing implementation. The API endpoint used (`/Playback/Info`) returns metadata without
-position data.
+**Position Tracking:** The current What's Now Playing implementation uses JRiver's `/Playback/Info` endpoint
+which provides track metadata and duration but does not include playback position data. JRiver's MCWS API may
+have other endpoints that provide position information - consult JRiver's API documentation for complete
+endpoint details.
 
 **See:** [JRiver Documentation](jriver.md) for full setup instructions.
 
@@ -353,8 +354,8 @@ To achieve the best possible accuracy with **What's Now Playing**, regardless of
    * Provides duration but not real-time position
 3. **Implement Position Tracking** (Advanced)
    * Fork What's Now Playing and add:
-     * MPRIS2 `Position` property polling (data available but not extracted)
-     * JRiver position tracking (check API documentation for available endpoints)
+     * MPRIS2 `Position` property polling (data available from DBus but not extracted)
+     * JRiver position tracking (investigate MCWS API for position endpoints)
      * Virtual DJ `lastplaytime` parsing with duration calculation
    * Contributions welcome to the project!
 
