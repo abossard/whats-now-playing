@@ -25,15 +25,14 @@ proprietary `#EXTVDJ` format extension to embed rich metadata directly in the hi
 
 ```m3u
 #EXTM3U
-#EXTVDJ:<time>21:39</time><lastplaytime>1674884385</lastplaytime><artist>Nick Cave & The Bad
-Seeds</artist><title>Hollywood</title>
+#EXTVDJ:<time>21:39</time><lastplaytime>1674884385</lastplaytime><artist>Nick Cave & The Bad Seeds</artist><title>Hollywood</title>
 netsearch://dz1873796677
-#EXTVDJ:<time>21:41</time><lastplaytime>1674884510</lastplaytime><artist>Kid 'N
-Play</artist><title>Can You Dig That</title><remix>Extended Mix</remix>
+#EXTVDJ:<time>21:41</time><lastplaytime>1674884510</lastplaytime><artist>Kid 'N Play</artist><title>Can You Dig That</title><remix>Extended Mix</remix>
 netsearch://dz85144450
 ```
 
-The last entry in the file represents the currently playing track.
+> Note: Each `#EXTVDJ` tag is a single line in the actual file. The last entry represents the currently
+> playing track.
 
 ### 2. Database.xml (Enhanced Metadata)
 
@@ -219,9 +218,8 @@ These databases are automatically rebuilt when:
 
 **EXTVDJ Tag Structure:**
 
-```xml
-#EXTVDJ:<time>HH:MM</time><lastplaytime>UNIX_TIMESTAMP</lastplaytime><artist>ARTIST_NAME</artist>
-<title>TITLE</title><remix>REMIX_INFO</remix>
+```text
+#EXTVDJ:<time>HH:MM</time><lastplaytime>UNIX_TIMESTAMP</lastplaytime><artist>ARTIST_NAME</artist><title>TITLE</title><remix>REMIX_INFO</remix>
 ```
 
 * `time` - 24-hour format timestamp
