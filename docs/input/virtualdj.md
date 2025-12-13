@@ -269,7 +269,7 @@ For applications requiring precise playback position:
 ### Using MPRIS2 for Better Accuracy
 
 **MPRIS2** (Media Player Remote Interfacing Specification) is a Linux DBus protocol that provides real-time
-playback information including position tracking. **What's Now Playing** supports MPRIS2 natively.
+playback information. **What's Now Playing** supports MPRIS2 natively for track metadata.
 
 **Supported MPRIS2 Players:**
 
@@ -290,9 +290,10 @@ playback information including position tracking. **What's Now Playing** support
    * No file polling or write delays
    * Works only on Linux (DBus requirement)
 
-**Accuracy:** MPRIS2 provides track duration and metadata but **does not expose real-time position** in the
-current What's Now Playing implementation. Position tracking would require reading
-`org.mpris.MediaPlayer2.Player.Position` property, which is not currently implemented.
+**Position Tracking:** MPRIS2 sources provide position data via `org.mpris.MediaPlayer2.Player.Position`
+property, but **What's Now Playing does not currently extract or use this data**. The implementation only
+reads track metadata (artist, title, album, duration) from `Metadata` property. Adding position tracking
+would require polling the `Position` property periodically.
 
 **See:** [MPRIS2 Documentation](mpris2.md) for full setup instructions.
 
@@ -352,8 +353,8 @@ To achieve the best possible accuracy with **What's Now Playing**, regardless of
    * Provides duration but not real-time position
 3. **Implement Position Tracking** (Advanced)
    * Fork What's Now Playing and add:
-     * MPRIS2 `Position` property polling
-     * JRiver `/Playback/Position` endpoint (if available)
+     * MPRIS2 `Position` property polling (data available but not extracted)
+     * JRiver position tracking (check API documentation for available endpoints)
      * Virtual DJ `lastplaytime` parsing with duration calculation
    * Contributions welcome to the project!
 
