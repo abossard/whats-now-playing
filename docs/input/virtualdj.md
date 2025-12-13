@@ -266,15 +266,113 @@ For applications requiring precise playback position:
    * Reduces file watcher latency on some systems
    * Still limited by VDJ's write frequency
 
+### Using MPRIS2 for Better Accuracy
+
+**MPRIS2** (Media Player Remote Interfacing Specification) is a Linux DBus protocol that provides real-time
+playback information including position tracking. **What's Now Playing** supports MPRIS2 natively.
+
+**Supported MPRIS2 Players:**
+
+* **Mixxx** - Free open-source DJ software with full MPRIS2 support (Linux only)
+* **VLC** - Media player with MPRIS2 support
+* **Rhythmbox, Amarok, Clementine** - Music players with MPRIS2
+* **Virtual DJ does NOT support MPRIS2** (no plans announced)
+
+**How to Use MPRIS2:**
+
+1. **Switch to MPRIS2-compatible software** (e.g., Mixxx for DJing)
+2. **In What's Now Playing Settings:**
+   * Core Settings → Source → Select "MPRIS2"
+   * Input Sources → MPRIS2 → Select your player from detected sources
+3. **Benefits:**
+   * Track duration available immediately (`mpris:length`)
+   * Real-time metadata updates via DBus signals
+   * No file polling or write delays
+   * Works only on Linux (DBus requirement)
+
+**Accuracy:** MPRIS2 provides track duration and metadata but **does not expose real-time position** in the
+current What's Now Playing implementation. Position tracking would require reading
+`org.mpris.MediaPlayer2.Player.Position` property, which is not currently implemented.
+
+**See:** [MPRIS2 Documentation](mpris2.md) for full setup instructions.
+
+### Using JRiver for Better Accuracy
+
+**JRiver Media Center** is a commercial media player (Windows/Mac/Linux) with a web service API (MCWS) that
+provides comprehensive playback information.
+
+**How to Use JRiver:**
+
+1. **Enable Media Network in JRiver:**
+   * Tools → Options → Media Network
+   * Check "Use Media Network to share this library"
+   * Note the port number (default: 52199)
+2. **In What's Now Playing Settings:**
+   * Core Settings → Source → Select "JRiver"
+   * Input Sources → JRiver → Configure host/port
+   * Use `localhost` or `127.0.0.1` for local setup
+3. **Benefits:**
+   * Track duration via `DurationMS` field
+   * HTTP-based API (works across network)
+   * Supports Windows, Mac, and Linux
+   * Commercial software ($60-80)
+
+**Accuracy:** JRiver provides track duration in milliseconds but **does not expose current playback position**
+in the What's Now Playing implementation. The API endpoint used (`/Playback/Info`) returns metadata without
+position data.
+
+**See:** [JRiver Documentation](jriver.md) for full setup instructions.
+
+### Maximum Accuracy: What You Can Do
+
+To achieve the best possible accuracy with **What's Now Playing**, regardless of your music source:
+
+**For Virtual DJ Users:**
+
+1. **Enable Polling Observer** (Settings → Quirks)
+   * Check "Use Polling Observer"
+   * Set polling interval to 0.5-1.0 seconds
+   * Reduces file watcher latency on some systems
+2. **Use Local Drives** - Avoid network shares
+   * Network latency adds 100-500ms delays
+   * File system caching is more reliable on local drives
+3. **Rebuild Database Regularly** (Input Sources → Virtual DJ)
+   * Click "Re-read" after adding/editing tracks
+   * Ensures duration metadata is current
+4. **Accept Limitations** - VDJ file-based approach limits accuracy to ±3-5 seconds
+
+**For Maximum Accuracy (Any Platform):**
+
+1. **Switch to MPRIS2-compatible software** (Linux only)
+   * **Mixxx** - Free DJ software with full MPRIS2 support
+   * Best option for accurate track change detection
+   * Position tracking would require code enhancement
+2. **Use JRiver Media Center** (Windows/Mac/Linux)
+   * Commercial option with API support
+   * Provides duration but not real-time position
+3. **Implement Position Tracking** (Advanced)
+   * Fork What's Now Playing and add:
+     * MPRIS2 `Position` property polling
+     * JRiver `/Playback/Position` endpoint (if available)
+     * Virtual DJ `lastplaytime` parsing with duration calculation
+   * Contributions welcome to the project!
+
+**Hardware Optimization:**
+
+* **SSD over HDD** - Reduces file I/O latency
+* **Wired network** - Avoid WiFi for network drives
+* **Dedicated machine** - Reduce CPU contention for file watchers
+
 ### Recommendation
 
 For streaming/DJ applications, **track change detection** (current implementation) is usually sufficient since
 viewers primarily care about *what song is playing* rather than *exact position within the song*. If precise
 position tracking is critical, consider:
 
-* Using a DJ software with MPRIS2 support (e.g., Mixxx)
-* Using JRiver Media Center (supports position via MCWS API)
-* Accepting ±3-5 second accuracy limitations with Virtual DJ
+* **Best option:** Switch to Mixxx (Linux) with MPRIS2 for accurate track detection
+* **Commercial option:** Use JRiver Media Center for cross-platform API access
+* **Accept limitations:** Virtual DJ with file polling provides ±3-5 second accuracy
+* **Contribute code:** Implement position tracking and submit a pull request!
 
 ## Technical Details
 
